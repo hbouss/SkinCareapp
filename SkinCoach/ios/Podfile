@@ -1,23 +1,30 @@
 # ios/Podfile
 
-# 1) Stub global pour Expo.podspec
+platform :ios, '13.0'
+
+# ── 1) Stub global pour Expo.podspec ──────────────────────────────
+#    Doit être défini *avant* use_expo_modules!
 def get_folly_config
-  # Renvoie un tableau vide de flags pour satisfaire Expo.podspec
   { compiler_flags: [] }
 end
 
-# 2) Exécutables React Native & Expo autolinking
-require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
-require File.join(File.dirname(`node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
+# ── 2) Chargement des scripts RN et Expo ─────────────────────────
+require_relative '../node_modules/expo/scripts/autolinking'
+require_relative '../node_modules/react-native/scripts/react_native_pods'
 
-# 3) Chargement des propriétés générées par expo prebuild
-require 'json'
-podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
+install! 'cocoapods', :deterministic_uuids => false
 
-platform :ios, podfile_properties['ios.deploymentTarget'] || '13.0'
+# ── 3) Déclaration de votre target ────────────────────────────────
+target 'SkinCoach' do
+  # Intègre tous les modules Expo (dont Expo.podspec)
+  use_expo_modules!
 
-install! 'cocoapods',
-  :deterministic_uuids => false
+  # Autolinking des modules natifs
+  use_native_modules!
+
+  # Si vous avez besoin de frameworks dynamiques (rare)
+  # use_frameworks! :linkage => :static
+end
 
 # 4) UNIQUE target pour votre app
 target 'SkinCoach' do
