@@ -1,44 +1,27 @@
 # ios/Podfile
 
-# 1) Platform et installation CocoaPods
 platform :ios, '13.0'
 install! 'cocoapods', :deterministic_uuids => false
 
-# 2) Autolinking Expo & React Native
-# Ces chemins sont corrects pour Expo SDK 47+ et RN 0.71.x
+# ── 1) Stub global pour Expo.podspec ─────────────────────────────
+# Définit noop pour les méthodes que Podspec appelle
+def get_folly_config
+  { compiler_flags: [] }
+end
+
+def install_modules_dependencies(spec); end
+
+# ── 2) Charger les scripts d’autolinking officiels ───────────────
 require_relative '../node_modules/expo/scripts/autolinking'
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 
-# 3) Lecture des flags générés (par expo prebuild)
-require 'json'
-podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
-flags = get_default_flags()
-
-# 4) Votre seule target
+# ── 3) Votre seule target, minimale ──────────────────────────────
 target 'SkinCoach' do
-  use_expo_modules!           # se charge d'Expo.podspec et de ses méthodes
-  config = use_native_modules!  # le hash config[:reactNativePath] sera disponible
+  # Charge Expo.podspec et configure tous les modules Expo
+  use_expo_modules!
 
-  # Si vous voulez frameworks dynamiques (optionnel)
-  # use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if podfile_properties['ios.useFrameworks']
-
-  # Configuration de React Native lui-même
+  # Configure React Native (Hermes / Fabric selon flags prébuild)
   use_react_native!(
-    :path => config[:reactNativePath],
-    :hermes_enabled => podfile_properties['expo.jsEngine'] == 'hermes',
-    :fabric_enabled => flags[:fabric_enabled],
-    :app_path => "#{Pod::Config.instance.installation_root}/.."
+    :path => '../node_modules/react-native'
   )
-
-  post_install do |installer|
-    react_native_post_install(installer, mac_catalyst_enabled: false)
-    __apply_Xcode_12_5_M1_post_install_workaround(installer)
-
-    # Désactive le code signing des bundles (Xcode 14+)
-    installer.pod_targets.each do |pod|
-      pod.build_configurations.each do |config|
-        config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
-      end
-    end
-  end
 end
