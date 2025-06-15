@@ -1,27 +1,27 @@
-# ios/Podfile
-
 platform :ios, '13.0'
-install! 'cocoapods', :deterministic_uuids => false
+install! 'cocoapods', deterministic_uuids: false
 
-# ── 1) Stub global pour Expo.podspec ─────────────────────────────
-# Définit noop pour les méthodes que Podspec appelle
-def get_folly_config
-  { compiler_flags: [] }
-end
-
-def install_modules_dependencies(spec); end
-
-# ── 2) Charger les scripts d’autolinking officiels ───────────────
-require_relative '../node_modules/expo/scripts/autolinking'
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 
-# ── 3) Votre seule target, minimale ──────────────────────────────
 target 'SkinCoach' do
-  # Charge Expo.podspec et configure tous les modules Expo
-  use_expo_modules!
+  # 1) Core Expo modules runtime
+  pod 'ExpoModulesCore', path: '../node_modules/expo-modules-core'
 
-  # Configure React Native (Hermes / Fabric selon flags prébuild)
-  use_react_native!(
-    :path => '../node_modules/react-native'
-  )
+  # 2) Vos packages Expo que vous utilisez, par exemple :
+  pod 'EXCamera', path: '../node_modules/expo-camera/ios'
+  pod 'EXImagePicker', path: '../node_modules/expo-image-picker/ios'
+  pod 'EXInAppPurchases', path: '../node_modules/expo-in-app-purchases/ios'
+
+  # 3) React Native lui-même
+  use_react_native!(path: '../node_modules/react-native')
+
+  # 4) Post-install standard RN
+  post_install do |installer|
+    react_native_post_install(installer)
+    installer.pod_targets.each do |pod|
+      pod.build_configurations.each do |config|
+        config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
+      end
+    end
+  end
 end
