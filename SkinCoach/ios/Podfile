@@ -1,45 +1,28 @@
 # ios/Podfile
 
+# 1) Platform et installation CocoaPods
 platform :ios, '13.0'
+install! 'cocoapods', :deterministic_uuids => false
 
-# ── 1) Stub global pour Expo.podspec ──────────────────────────────
-#    Doit être défini *avant* use_expo_modules!
-def get_folly_config
-  { compiler_flags: [] }
-end
-
-# ── 2) Chargement des scripts RN et Expo ─────────────────────────
+# 2) Autolinking Expo & React Native
+# Ces chemins sont corrects pour Expo SDK 47+ et RN 0.71.x
 require_relative '../node_modules/expo/scripts/autolinking'
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 
-install! 'cocoapods', :deterministic_uuids => false
+# 3) Lecture des flags générés (par expo prebuild)
+require 'json'
+podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
+flags = get_default_flags()
 
-# ── 3) Déclaration de votre target ────────────────────────────────
+# 4) Votre seule target
 target 'SkinCoach' do
-  # Intègre tous les modules Expo (dont Expo.podspec)
-  use_expo_modules!
+  use_expo_modules!           # se charge d'Expo.podspec et de ses méthodes
+  config = use_native_modules!  # le hash config[:reactNativePath] sera disponible
 
-  # Autolinking des modules natifs
-  use_native_modules!
+  # Si vous voulez frameworks dynamiques (optionnel)
+  # use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if podfile_properties['ios.useFrameworks']
 
-  # Si vous avez besoin de frameworks dynamiques (rare)
-  # use_frameworks! :linkage => :static
-end
-
-# 4) UNIQUE target pour votre app
-target 'SkinCoach' do
-  # Use Expo modules (génère le Podspec et intègre Expo.podspec)
-  use_expo_modules!
-
-  # Use all the native modules autolinkés
-  config = use_native_modules!
-
-  # Si vous voulez forcer frameworks dynamiques
-  use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if podfile_properties['ios.useFrameworks']
-
-  # Flags par défaut (Hermes, Fabric…)
-  flags = get_default_flags()
-
+  # Configuration de React Native lui-même
   use_react_native!(
     :path => config[:reactNativePath],
     :hermes_enabled => podfile_properties['expo.jsEngine'] == 'hermes',
@@ -48,14 +31,13 @@ target 'SkinCoach' do
   )
 
   post_install do |installer|
-    react_native_post_install(installer, :mac_catalyst_enabled => false)
+    react_native_post_install(installer, mac_catalyst_enabled: false)
     __apply_Xcode_12_5_M1_post_install_workaround(installer)
 
-    installer.target_installation_results.pod_target_installation_results.each do |_, result|
-      result.resource_bundle_targets.each do |bundle_target|
-        bundle_target.build_configurations.each do |config|
-          config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
-        end
+    # Désactive le code signing des bundles (Xcode 14+)
+    installer.pod_targets.each do |pod|
+      pod.build_configurations.each do |config|
+        config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
       end
     end
   end
