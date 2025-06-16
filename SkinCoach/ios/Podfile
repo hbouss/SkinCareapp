@@ -1,22 +1,35 @@
+# ios/Podfile
+
 platform :ios, '15.1'
 install! 'cocoapods', deterministic_uuids: false
 
-# 1) Charger React Native pods (ne définit PAS prepare_react_native_project!)
+# 1) Charger le script de React Native (pour use_react_native! et post_install)
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 
-# 2) Charger l’autolinker Expo (définit les méthodes Expo nécessaires)
+# 2) Charger le script Expo autolinking (pour use_expo_modules!)
 require_relative '../node_modules/expo/scripts/autolinking'
 
-# 3) (Plus d'appel à prepare_react_native_project!)
+# 3) STUB global pour éviter les erreurs dans Expo.podspec
+unless defined?(get_folly_config)
+  def get_folly_config; { compiler_flags: [] }; end
+end
+unless defined?(install_modules_dependencies)
+  def install_modules_dependencies(spec); end
+end
 
 target 'SkinCoach' do
-  use_expo_modules!                     # Intègre Expo.podspec, sans planter
-  config = use_native_modules!          # autolinking natif
+  # Intègre Expo Modules (Expo.podspec)
+  use_expo_modules!
 
+  # Autolinking des autres modules natifs
+  config = use_native_modules!
+
+  # Configure React Native Core
   use_react_native!(
-    path: config[:reactNativePath],
-    hermes_enabled: true,               # ou selon votre config
-    app_path: "#{Pod::Config.instance.installation_root}/.."
+    :path => config[:reactNativePath],
+    :hermes_enabled => true,
+    :fabric_enabled => false,
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
   post_install do |installer|
