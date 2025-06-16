@@ -1,0 +1,37 @@
+diff --git a/node_modules/expo/Expo.podspec b/node_modules/expo/Expo.podspec
+index 05f4ab0..f4bb150 100644
+--- a/node_modules/expo/Expo.podspec
++++ b/node_modules/expo/Expo.podspec
+@@ -1,3 +1,19 @@
++# ── patch-package stubs pour Expo.podspec ──
++
++unless defined?(get_folly_config)
++  def get_folly_config
++    { compiler_flags: [] }
++  end
++end
++
++unless defined?(install_modules_dependencies)
++  def install_modules_dependencies(spec)
++    # noop pour que Expo.podspec n’erreure plus
++  end
++end
++
++# ── fin patch-package stubs ──
++
+ require 'json'
+ require 'colored2' # dependency of CocoaPods
+ 
+@@ -18,7 +34,11 @@ end
+ 
+ reactNativeTargetVersion = reactNativeVersion.split('.')[1].to_i
+ 
+-compiler_flags = get_folly_config()[:compiler_flags]
++begin
++  compiler_flags = get_folly_config()[:compiler_flags]
++rescue NoMethodError
++  compiler_flags = []
++end
+ 
+ package = JSON.parse(File.read(File.join(__dir__, 'package.json')))
+ 
