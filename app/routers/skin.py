@@ -20,6 +20,8 @@ from app.routers.dependencies import subscription_required
 router = APIRouter(prefix="/skin", tags=["skin"])
 logger = logging.getLogger("skin")
 
+FREE_ANALYSIS_LIMIT = 3
+
 # --- Endpoint gratuit : analyse de base (requiert login) ---
 @router.post(
     "/analyze",
@@ -32,6 +34,14 @@ async def analyze(
     db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
+    # quota gratuit
+    sessions = await get_sessions_for_user(db, int(current_user.id))
+    if len(sessions) >= FREE_ANALYSIS_LIMIT and not current_user.is_premium:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Limite gratuite ({FREE_ANALYSIS_LIMIT} analyses) atteinte. Passez Premium."
+        )
+
     if not file.content_type.startswith("image/"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

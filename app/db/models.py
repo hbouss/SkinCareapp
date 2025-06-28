@@ -18,7 +18,7 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     is_admin = Column(Boolean, default=False)
-    subscription_expiry = Column(DateTime, nullable=True)
+    is_premium = Column(Boolean, default=False)
     sessions = relationship("Session", back_populates="user", cascade="all, delete")
 
 class Session(Base):

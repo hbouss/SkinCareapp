@@ -7,6 +7,7 @@ from datetime import datetime
 from sqlalchemy import update
 from app.db.models import User as DBUser      # votre modèle SQLAlchemy
 from app.models.user import UserCreate, UserInDB, UserPublic
+from app.db.models import User
 
 async def get_user_by_email(
     db: AsyncSession,
@@ -95,14 +96,17 @@ async def create_user(
         is_admin=db_user.is_admin
     )
 
-async def update_user_subscription(
+async def update_user_is_premium(
     db: AsyncSession,
     user_id: int,
-    expiry: datetime
-):
+    is_premium: bool
+) -> None:
+    """
+    Active ou désactive le flag is_premium pour l'utilisateur donné.
+    """
     await db.execute(
-        update(DBUser)
-        .where(DBUser.id == user_id)
-        .values(subscription_expiry=expiry)
+        update(User)
+        .where(User.id == user_id)
+        .values(is_premium=is_premium)
     )
     await db.commit()

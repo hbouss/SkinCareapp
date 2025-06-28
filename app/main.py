@@ -8,6 +8,7 @@ from app.db.session import init_models
 from app.routers import auth, skin  # importez votre module auth
 from fastapi.staticfiles import StaticFiles
 from app.routers import interpret
+from app.routers.subscription import router as subscription_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -39,6 +40,9 @@ app.include_router(
 app.include_router(skin.router, tags=["skin"])
 
 app.include_router(interpret.router)
+
+
+app.include_router(subscription_router)
 
 # Sert le dossier ./images sous /images
 app.mount(

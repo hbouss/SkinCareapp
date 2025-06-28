@@ -14,3 +14,4 @@ class UserInDB(UserBase):
 class UserPublic(UserBase):
     id: str
     is_admin: bool
+    is_premium: bool = False

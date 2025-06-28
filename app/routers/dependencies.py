@@ -5,17 +5,11 @@ from app.routers.auth import get_current_user  # votre dépendance existante
 from app.models.user import UserPublic
 
 async def subscription_required(
-    current_user: UserPublic = Depends(get_current_user)
-) -> UserPublic:
-    """
-    Lève une 402 si l'utilisateur n'a pas d'abonnement actif.
-    Renvoie l'objet UserPublic sinon.
-    """
-    expiry = current_user.subscription_expiry
-    now = datetime.utcnow()
-    if not expiry or expiry < now:
+    current_user = Depends(get_current_user)
+):
+    if not getattr(current_user, "is_premium", False):
         raise HTTPException(
-            status_code=status.HTTP_402_PAYMENT_REQUIRED,
-            detail="Abonnement expiré ou inexistant. Veuillez souscrire pour accéder à cette ressource."
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Accès réservé aux utilisateurs Premium"
         )
     return current_user
