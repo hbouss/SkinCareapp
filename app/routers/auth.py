@@ -59,7 +59,7 @@ async def get_current_user(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Utilisateur non trouvé")
 
     # On retourne un UserPublic (sans hashed_password)
-    return UserPublic(id=user.id, email=user.email, is_admin=user.is_admin)
+    return UserPublic(id=user.id, email=user.email, is_admin=user.is_admin, is_premium=user.is_premium)
 
 def admin_required(current_user: UserPublic = Depends(get_current_user)):
     if not current_user.is_admin:

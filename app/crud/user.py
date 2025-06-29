@@ -26,7 +26,8 @@ async def get_user_by_email(
         id=str(user.id),
         email=user.email,
         hashed_password=user.hashed_password,
-        is_admin=user.is_admin
+        is_admin=user.is_admin,
+        is_premium=user.is_premium
     )
 
 
@@ -47,7 +48,8 @@ async def get_user_by_id(
         id=str(user.id),
         email=user.email,
         hashed_password=user.hashed_password,
-        is_admin=user.is_admin
+        is_admin=user.is_admin,
+        is_premium=user.is_premium
     )
 
 
@@ -93,8 +95,12 @@ async def create_user(
         id=str(db_user.id),
         email=db_user.email,
         hashed_password=db_user.hashed_password,
-        is_admin=db_user.is_admin
+        is_admin=db_user.is_admin,
     )
+
+async def get_all_users(db: AsyncSession) -> list[UserInDB]:
+    result = await db.execute(select(User).order_by(User.email))
+    return result.scalars().all()
 
 async def update_user_is_premium(
     db: AsyncSession,
