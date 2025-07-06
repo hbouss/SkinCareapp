@@ -17,5 +17,4 @@ COPY . .
 
 # 4) Exposer le port et lancer uvicorn
 EXPOSE 8000
-ENTRYPOINT ["sh", "-c"]
-CMD ["uvicorn app.main:app --host 0.0.0.0 --port $PORT"]
+CMD uvicorn app.main:app --host 0.0.0.0 --port $PORT
