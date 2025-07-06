@@ -1,6 +1,6 @@
-const BACKEND_URL =
-  process.env.APP_ENV === "production"
-    ? "https://web-production-932b.up.railway.app"
-    : "http://192.168.1.x:8000"; // votre URL locale
+// src/config.ts
 
-export { BACKEND_URL };
+// __DEV__ est fourni par React Native : true en mode développement, false en build release
+export const BACKEND_URL = __DEV__
+  ? "http://192.168.1.38:8000"                    // votre API locale
+  : "https://web-production-932b.up.railway.app";  // votre URL Railway (sans slash final)
