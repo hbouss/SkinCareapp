@@ -19,4 +19,4 @@ android/
 
 # IDE
 .idea/
-*.iml
+*.iml.env
