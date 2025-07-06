@@ -1,10 +1,11 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BACKEND_URL } from "../config";
 
-export const API_BASE = "http://192.168.1.38:8000"; // ou votre IP réseau si sur vrai appareil
+// export const API_BASE = "http://192.168.1.38:8000";
 
 export const api = axios.create({
-  baseURL: API_BASE,
+  baseURL: BACKEND_URL,
 });
 
 // Injecte automatiquement le token si présent

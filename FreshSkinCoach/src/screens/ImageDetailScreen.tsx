@@ -15,6 +15,7 @@ import type { RootStackParamList } from "../navigation/AppNavigator";
 import { translateLabel } from "../i18n/labels"; // ← Import du translateLabel
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { BACKEND_URL } from "../config";
 
 type DetailRouteProp = RouteProp<RootStackParamList, "ImageDetail">;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "ImageDetail">;
@@ -23,7 +24,7 @@ type Props = { route: DetailRouteProp };
 export default function ImageDetailScreen({ route }: Props) {
   const navigation = useNavigation<NavigationProp>();
   const { image_url, annotations = [] } = route.params;
-  const uri = `http://192.168.1.38:8000${image_url}`;
+  const uri = `${BACKEND_URL}${image_url}`;
 
   const [origW, setOrigW] = useState(1);
   const [origH, setOrigH] = useState(1);

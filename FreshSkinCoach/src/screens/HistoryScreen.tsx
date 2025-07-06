@@ -15,8 +15,9 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/AppNavigator";
-import { api, API_BASE } from "../api/client";
+import { api } from "../api/client";
 import { translateLabel } from "../i18n/labels"; // ← import de la fonction
+import { BACKEND_URL } from "../config";
 
 type Annotation = {
   x: number; y: number; width: number; height: number; label: string;
@@ -81,7 +82,7 @@ export default function HistoryScreen() {
           }
         >
           <Image
-            source={{ uri: `${API_BASE}${item.image_url}` }}
+            source={{ uri: `${BACKEND_URL}${item.image_url}` }}
             style={styles.thumbnail}
           />
           <View>

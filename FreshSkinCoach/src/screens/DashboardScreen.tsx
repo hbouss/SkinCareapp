@@ -23,6 +23,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 import { useAuth } from "../context/AuthContext";
 import { translateLabel } from "../i18n/labels"; // ← on importe la fonction
+import { BACKEND_URL } from "../config";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -80,7 +81,7 @@ export default function DashboardScreen({ route, navigation }: Props) {
       {/* HEADER IMAGE */}
       <View style={styles.header}>
         <Image
-          source={{ uri: `http://192.168.1.38:8000${annotated_image_url}` }}
+          source={{ uri: `${BACKEND_URL}${annotated_image_url}` }}
           style={styles.headerImage}
         />
         <View style={styles.headerOverlay} />
