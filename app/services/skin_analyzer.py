@@ -1,10 +1,11 @@
 # app/services/skin_analyzer.py
 import os
 from uuid import uuid4
+from typing import Dict, List, TypedDict
 
 import cv2
-from typing import Dict, List, TypedDict
-from inference_sdk import InferenceHTTPClient
+import httpx
+
 from app.core.config import settings
 
 class Annotation(TypedDict):
@@ -14,46 +15,43 @@ class Annotation(TypedDict):
     height: float  # ratio hauteur de box
     label: str
 
-CLIENT = InferenceHTTPClient(
-    api_url=settings.ROBOFLOW_INFERENCE_API_URL,
-    api_key=settings.ROBOFLOW_INFERENCE_API_KEY
-)
-
 ALL_CLASSES = [
-    "Acne",
-    "Dark-Circle",
-    "Dry-Skin",
-    "EyeBags",
-    "Normal-Skin",
-    "Oily-Skin",
-    "Pores",
-    "Spots",
-    "Wrinkles",
+    "Acne", "Dark-Circle", "Dry-Skin", "EyeBags",
+    "Normal-Skin", "Oily-Skin", "Pores", "Spots", "Wrinkles",
 ]
 
 async def analyze_image(image_path: str) -> Dict[str, object]:
-    # 1) d’abord chargez l’image pour connaître sa résolution
+    # 1) charge l’image pour ses dimensions
     img = cv2.imread(image_path)
     if img is None:
         raise RuntimeError("Impossible de lire l'image pour normalisation")
     img_h, img_w = img.shape[:2]
 
-    # 2) appelez Roboflow
-    result = CLIENT.infer(image_path, model_id=settings.ROBOFLOW_INFERENCE_MODEL_ID)
+    # 2) appel direct à l'API Roboflow
+    url = f"{settings.ROBOFLOW_INFERENCE_API_URL}/model/{settings.ROBOFLOW_INFERENCE_MODEL_ID}/infer"
+    params = {"api_key": settings.ROBOFLOW_INFERENCE_API_KEY}
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        # on envoie le fichier en multipart/form-data (httpx s’occupe du header)
+        with open(image_path, "rb") as f:
+            files = {"file": (os.path.basename(image_path), f, "application/octet-stream")}
+            resp = await client.post(url, params=params, files=files)
+
+        resp.raise_for_status()
+        result = resp.json()
 
     preds = result.get("predictions", [])
 
-    # 3) initialisation uniforme
+    # 3) calcul des scores
     scores: Dict[str, float] = {cls: 0.0 for cls in ALL_CLASSES}
     for p in preds:
         cls = p["class"]
         if cls in scores:
             scores[cls] = p["confidence"]
 
-    # 4) normalisez les annotations
+    # 4) normalisation des boxes
     annotations: List[Annotation] = []
     for p in preds:
-        # Roboflow renvoie x,y center en pixels et width,height en pixels
         cx, cy, w, h = p["x"], p["y"], p["width"], p["height"]
         annotations.append({
             "x":      cx / img_w,
@@ -63,10 +61,9 @@ async def analyze_image(image_path: str) -> Dict[str, object]:
             "label":  p["class"]
         })
 
-        # 5) Dessin des bounding boxes
+    # 5) dessine les boxes sur l’image
     annotated = img.copy()
     for ann in annotations:
-        # reconvertir ratios en pixels
         cx = int(ann["x"] * img_w)
         cy = int(ann["y"] * img_h)
         bw = int(ann["width"] * img_w)
@@ -79,13 +76,12 @@ async def analyze_image(image_path: str) -> Dict[str, object]:
             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (232, 106, 74), 2
         )
 
-    # 6) Sauvegarde de l’image annotée
+    # 6) sauvegarde de l’image annotée
     os.makedirs(settings.IMAGE_SAVE_DIR, exist_ok=True)
     base = uuid4().hex
     annotated_filename = f"{base}_annotated.jpg"
     annotated_path = os.path.join(settings.IMAGE_SAVE_DIR, annotated_filename)
     cv2.imwrite(annotated_path, annotated)
-
 
     return {
         "scores": scores,
