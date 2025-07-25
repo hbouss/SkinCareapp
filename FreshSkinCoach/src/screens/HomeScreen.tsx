@@ -13,12 +13,41 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
+import { Alert } from "react-native";
 
 type HomeNavProp = NativeStackNavigationProp<RootStackParamList, "Home">;
 
 export default function HomeScreen() {
   const navigation = useNavigation<HomeNavProp>();
-  const { user, signOut } = useAuth();
+  const { user, signOut, deleteAccount } = useAuth();
+
+  const confirmDelete = () => {
+    Alert.alert(
+      "Supprimer mon compte",
+      "Cette action est irréversible et effacera toutes vos données. Continuer ?",
+      [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteAccount();
+    // navigation ou autre
+  } catch (err: any) {
+    console.log("=== deleteAccount error ===", err.response ?? err.message);
+    Alert.alert(
+      "Erreur",
+      err.response?.data?.detail
+        ? `Impossible de supprimer le compte : ${err.response.data.detail}`
+        : "Impossible de supprimer le compte. Voir console pour plus d’infos."
+    );
+  }
+},
+        },
+      ]
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -94,6 +123,13 @@ export default function HomeScreen() {
             </Text>
           </TouchableOpacity>
         )}
+        {/* --- Option de suppression de compte --- */}
+        <TouchableOpacity style={styles.card} onPress={confirmDelete}>
+          <Text style={styles.cardTitle}>Supprimer mon compte</Text>
+          <Text style={styles.cardDesc}>
+            Supprimez définitivement votre profil et vos données
+          </Text>
+        </TouchableOpacity>
 
         <TouchableOpacity style={styles.logout} onPress={signOut}>
           <Text style={styles.logoutText}>Déconnexion</Text>

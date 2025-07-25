@@ -20,6 +20,7 @@ type AuthContextType = {
   signOut: () => Promise<void>;
   analyzeSkin: (file: FormData) => Promise<any>;
   subscribe: (receipt: string, platform: "apple" | "google") => Promise<void>;
+  deleteAccount: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -110,9 +111,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(me.data);
   };
 
+ const deleteAccount = async () => {
+    if (!user) throw new Error("Utilisateur non connecté");
+    // 1) Appel DELETE
+    await api.delete("/auth/me");
+    // 2) Nettoyage local
+    await AsyncStorage.removeItem("access_token");
+    setUser(null);
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, signIn, signOut, analyzeSkin, subscribe }}
+      value={{ user, signIn, signOut, analyzeSkin, subscribe, deleteAccount, }}
     >
       {children}
     </AuthContext.Provider>

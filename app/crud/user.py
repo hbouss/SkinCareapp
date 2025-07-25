@@ -4,8 +4,8 @@ from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from datetime import datetime
-from sqlalchemy import update
-from app.db.models import User as DBUser      # votre modèle SQLAlchemy
+from sqlalchemy import update, delete
+from app.db.models import User as DBUser, Session as DBSession      # votre modèle SQLAlchemy
 from app.models.user import UserCreate, UserInDB, UserPublic
 from app.db.models import User
 
@@ -114,5 +114,21 @@ async def update_user_is_premium(
         update(User)
         .where(User.id == user_id)
         .values(is_premium=is_premium)
+    )
+    await db.commit()
+
+async def delete_user_by_id(db: AsyncSession, user_id: int) -> None:
+    """
+    Supprime les sessions puis l’utilisateur.
+    """
+    # 1) Supprimer toutes les sessions de l’utilisateur
+    await db.execute(
+        delete(DBSession).where(DBSession.user_id == user_id)
+    )
+    # 2) (Éventuellement) supprimer d’autres dépendances :
+    #    await db.execute(delete(Analyses).where(Analyses.user_id == user_id))
+    # 3) Supprimer l’utilisateur
+    await db.execute(
+        delete(DBUser).where(DBUser.id == user_id)
     )
     await db.commit()

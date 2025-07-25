@@ -2,14 +2,14 @@
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import timedelta
 from jose import JWTError
 
 from app.models.user import UserCreate, UserPublic
-from app.crud.user import get_user_by_email, create_user as crud_create_user
+from app.crud.user import get_user_by_email, create_user as crud_create_user, delete_user_by_id
 from app.services.auth import (
     hash_password,
     verify_password,
@@ -134,3 +134,20 @@ async def read_users_me(
     Renvoie directement le UserPublic extrait du token.
     """
     return current_user
+
+
+@router.delete(
+    "/me",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Supprimer le compte de l’utilisateur connecté"
+)
+async def delete_current_user(
+    current_user: UserPublic = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Supprime d'abord toutes les sessions puis l’utilisateur.
+    """
+    # Ici on délègue au CRUD :
+    await delete_user_by_id(db, int(current_user.id))
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
