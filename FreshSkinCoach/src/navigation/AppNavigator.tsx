@@ -15,6 +15,7 @@ import { useAuth } from "../context/AuthContext";
 import ImageDetailScreen from "../screens/ImageDetailScreen";
 import SubscriptionScreen from "@/src/screens/SubscriptionScreen";
 import AllUsersScreen from "@/src/screens/AllUsersScreen";
+import ReferencesScreen from "../screens/ReferencesScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -26,6 +27,7 @@ export type RootStackParamList = {
   Subscription: undefined;   // écran d’abonnement
   AllHistory: undefined;    // historique global admin
   AllUsers: undefined;
+  References:  undefined;
   Dashboard: {
     session: {
       session_id: number;
@@ -62,6 +64,8 @@ export default function AppNavigator() {
           <Stack.Screen name="Stats" component={StatsScreen} />
 
           <Stack.Screen name="Subscription" component={SubscriptionScreen} />
+
+          <Stack.Screen name="References" component={ReferencesScreen} options={{ title: "Sources" }} />
 
           {/* Écran historique global (admin) */}
           <Stack.Screen name="AllHistory" component={AllHistoryScreen} />

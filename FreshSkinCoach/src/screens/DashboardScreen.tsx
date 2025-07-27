@@ -167,6 +167,15 @@ export default function DashboardScreen({ route, navigation }: Props) {
                   );
                 })}
               </View>
+              {/* Bouton Voir les sources */}
+              <TouchableOpacity
+                onPress={() => navigation.navigate("References")}
+                style={{ marginTop: 10, alignSelf: "center" }}
+              >
+                <Text style={{ color: "#0066CC", fontSize: 14 }}>
+                  Voir les sources
+                </Text>
+              </TouchableOpacity>
             </LinearGradient>
           )}
         </>
