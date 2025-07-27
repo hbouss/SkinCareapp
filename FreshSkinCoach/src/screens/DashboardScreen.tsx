@@ -167,17 +167,20 @@ export default function DashboardScreen({ route, navigation }: Props) {
                   );
                 })}
               </View>
-              {/* Bouton Voir les sources */}
-              <TouchableOpacity
-                onPress={() => navigation.navigate("References")}
-                style={{ marginTop: 10, alignSelf: "center" }}
-              >
-                <Text style={{ color: "#0066CC", fontSize: 14 }}>
-                  Voir les sources
-                </Text>
-              </TouchableOpacity>
             </LinearGradient>
           )}
+          {/* Bouton stylisé 'Voir les sources*' aligné à droite */}
+          <TouchableOpacity
+            onPress={() => navigation.navigate("References")}
+            style={styles.sourcesButton}
+          >
+            <Text style={styles.sourcesText}>Voir les sources*</Text>
+          </TouchableOpacity>
+
+          {/* Disclaimer */}
+          <Text style={styles.disclaimerText}>
+            * Informations et recommandations basées sur des études et guidelines reconnues. Pour tout avis médical, consultez un dermatologue.
+          </Text>
         </>
       )}
 
@@ -246,6 +249,14 @@ const styles = StyleSheet.create({
   recoRow: { fontSize: 14, marginBottom: 8 },
   recoTitle: { fontSize: 14, fontWeight: "700", color: "#E86A4A" },
   recoDetail: { fontSize: 14, color: "#333", flexShrink: 1 },
+
+  // Nouveau style pour le bouton Sources
+  sourcesButton: { alignSelf: "flex-end", marginVertical: 10, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: "#FFF", borderWidth: 1, borderColor: "#0066CC", borderRadius: 12 },
+  sourcesText: { color: "#0066CC", fontSize: 14, fontWeight: "500" },
+
+  // Style pour le disclaimer
+  disclaimerText: { fontSize: 12, color: "#555", fontStyle: "italic", textAlign: "center", marginBottom: 20 },
+
 
   ctaContainer: { width: "100%", marginBottom: 20 },
   ctaButton: {
