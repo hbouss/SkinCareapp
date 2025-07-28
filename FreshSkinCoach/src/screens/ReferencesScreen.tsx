@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, FlatList, TouchableOpacity, Linking, StyleSheet } from "react-native";
+import { SafeAreaView, FlatList, TouchableOpacity, Linking, Text, StyleSheet } from "react-native";
 import { REFERENCES } from "../data/references";
 
 export default function ReferencesScreen() {
@@ -8,7 +8,7 @@ export default function ReferencesScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.header}>Sources et références</Text>
       <FlatList
         data={REFERENCES}
@@ -21,7 +21,7 @@ export default function ReferencesScreen() {
           </TouchableOpacity>
         )}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -29,7 +29,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F9F9F9",
-    padding: 16,
+    paddingTop: 20,
+    paddingHorizontal: 16,
   },
   header: {
     fontSize: 24,
