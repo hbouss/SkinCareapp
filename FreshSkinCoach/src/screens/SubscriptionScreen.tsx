@@ -8,12 +8,17 @@ import {
   StyleSheet,
   ActivityIndicator,
   ImageBackground,
+  Linking
 } from "react-native";
 import * as InAppPurchases from "expo-in-app-purchases";
 import { useAuth } from "../context/AuthContext";
 import { useIAP } from "../hooks/useIAP";
 
 const PROD_ID = "com.skincoach.premium_monthly";
+
+// URL de votre politique & EULA
+const PRIVACY_URL = "https://hbouss.github.io/freshskincoach/privacy-policy.html";
+const EULA_URL    = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/";
 
 export default function SubscriptionScreen() {
   const { subscribe } = useAuth();
@@ -131,6 +136,16 @@ export default function SubscriptionScreen() {
         >
           <Text style={styles.restoreText}>Restaurer mes achats</Text>
         </TouchableOpacity>
+        {/* ----> NOUVEAU BLOC DE LIENS <---- */}
+        <View style={styles.links}>
+          <Text style={styles.linkLabel}>Plus d’informations :</Text>
+          <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_URL)}>
+            <Text style={styles.linkText}>• Politique de confidentialité</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => Linking.openURL(EULA_URL)}>
+            <Text style={styles.linkText}>• Conditions d’utilisation*</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -228,5 +243,23 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#666",
     fontSize: 16,
+  },
+  links: {
+    marginTop: 24,
+    borderTopWidth: 1,
+    borderTopColor: "#EEE",
+    paddingTop: 16,
+  },
+  linkLabel: {
+    fontSize: 14,
+    color: "#333",
+    fontWeight: "500",
+    marginBottom: 8,
+  },
+  linkText: {
+    fontSize: 14,
+    color: "#0066CC",
+    textDecorationLine: "underline",
+    marginVertical: 4,
   },
 });
