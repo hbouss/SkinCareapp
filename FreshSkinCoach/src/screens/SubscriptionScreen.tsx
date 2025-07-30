@@ -99,7 +99,7 @@ export default function SubscriptionScreen() {
       {/* Détails de l'abonnement */}
       <View style={styles.planInfo}>
         <Text style={styles.planName}>{prod.title}</Text>
-        <Text style={styles.planPeriod}>Durée : 1 mois</Text>
+        <Text style={styles.planPeriod}>Abonnement de 1 mois (auto-renouvelable)</Text>
         <Text style={styles.planPrice}>{prod.price} / mois</Text>
       </View>
 
@@ -119,7 +119,7 @@ export default function SubscriptionScreen() {
         >
           {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.buttonText}>S’abonner</Text>}
         </TouchableOpacity>
-        <Text style={styles.engagementText}>Sans engagement</Text>
+        <Text style={styles.engagementText}>Renouvelable automatiquement chaque mois, annulable à tout moment</Text>
 
         <TouchableOpacity
           style={[styles.button, styles.restoreButton]}
